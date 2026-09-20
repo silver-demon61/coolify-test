@@ -1,25 +1,24 @@
 name: Coolify Relay Node (Test Ring)
 
-on:
-  push:
-    branches: [ main ]
+"on":
   workflow_dispatch:
     inputs:
       cycle_count:
-        description: "Relay cycle counter"
+        description: 'Relay cycle counter'
         required: false
-        default: "0"
+        default: '0'
         type: string
       retry_depth:
-        description: "Circuit breaker retry depth"
+        description: 'Circuit breaker retry depth'
         required: false
-        default: "0"
+        default: '0'
         type: string
       test_handover:
-        description: "Handover minutes (default 5m)"
+        description: 'Handover minutes (default 5m)'
         required: false
-        default: "5"
+        default: '5'
         type: string
+
 jobs:
   coolify-relay:
     name: Run Persistent Coolify Relay Node
@@ -151,22 +150,7 @@ jobs:
             sudo chmod 600 /etc/cloudflared/credentials.json
 
             # Write verified repository wildcard ingress configuration
-            cat << 'EOF' | sudo tee /etc/cloudflared/config.yml >/dev/null
-tunnel: 524d6f0e-f73c-464c-aafe-30fb59001336
-credentials-file: /etc/cloudflared/credentials.json
-
-ingress:
-  - hostname: "coolify.justsawyou.cyou"
-    service: http://localhost:8000
-  - hostname: "realtime.justsawyou.cyou"
-    service: http://localhost:6001
-  - hostname: "*.justsawyou.cyou"
-    service: https://localhost:443
-    originRequest:
-      noTLSVerify: true
-      matchSNItoHost: true
-  - service: http_status:404
-EOF
+            echo "dHVubmVsOiA1MjRkNmYwZS1mNzNjLTQ2NGMtYWFmZS0zMGZiNTkwMDEzMzYKY3JlZGVudGlhbHMtZmlsZTogL2V0Yy9jbG91ZGZsYXJlZC9jcmVkZW50aWFscy5qc29uCgppbmdyZXNzOgogIC0gaG9zdG5hbWU6ICJjb29saWZ5Lmp1c3RzYXd5b3UuY3lvdSIKICAgIHNlcnZpY2U6IGh0dHA6Ly9sb2NhbGhvc3Q6ODAwMAogIC0gaG9zdG5hbWU6ICJyZWFsdGltZS5qdXN0c2F3eW91LmN5b3UiCiAgICBzZXJ2aWNlOiBodHRwOi8vbG9jYWxob3N0OjYwMDEKICAtIGhvc3RuYW1lOiAiKi5qdXN0c2F3eW91LmN5b3UiCiAgICBzZXJ2aWNlOiBodHRwczovL2xvY2FsaG9zdDo0NDMKICAgIG9yaWdpblJlcXVlc3Q6CiAgICAgIG5vVExTVmVyaWZ5OiB0cnVlCiAgICAgIG1hdGNoU05JdG9Ib3N0OiB0cnVlCiAgLSBzZXJ2aWNlOiBodHRwX3N0YXR1czo0MDQK" | base64 -d | sudo tee /etc/cloudflared/config.yml >/dev/null
             sudo chmod 600 /etc/cloudflared/config.yml
 
             echo "Validating cloudflared ingress configuration..."
