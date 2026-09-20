@@ -1,24 +1,25 @@
 name: Coolify Relay Node (Test Ring)
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       cycle_count:
-        description: 'Relay cycle counter'
+        description: "Relay cycle counter"
         required: false
-        default: '0'
+        default: "0"
         type: string
       retry_depth:
-        description: 'Circuit breaker retry depth'
+        description: "Circuit breaker retry depth"
         required: false
-        default: '0'
+        default: "0"
         type: string
       test_handover:
-        description: 'Handover minutes (default 5m)'
+        description: "Handover minutes (default 5m)"
         required: false
-        default: '5'
+        default: "5"
         type: string
-
 jobs:
   coolify-relay:
     name: Run Persistent Coolify Relay Node
