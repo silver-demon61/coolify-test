@@ -154,7 +154,7 @@ jobs:
             sudo chmod 600 /etc/cloudflared/config.yml
 
             echo "Validating cloudflared ingress configuration..."
-            sudo cloudflared tunnel ingress validate --config /etc/cloudflared/config.yml || true
+            sudo cloudflared tunnel --config /etc/cloudflared/config.yml ingress validate || true
 
             echo "Launching local-config cloudflared daemon..."
             sudo cloudflared tunnel --config /etc/cloudflared/config.yml run > /tmp/cloudflared.log 2>&1 &
@@ -197,7 +197,7 @@ jobs:
           # Cancel predecessor runner run to release concurrency
           REPOS=(
             "silver-demon61/coolify-test"
-            "silver-demon60/coolify-test"
+            "synth-coder/coolify-test"
           )
           CURRENT_INDEX=-1
           for i in "${!REPOS[@]}"; do
@@ -271,7 +271,7 @@ jobs:
 
           REPOS=(
             "silver-demon61/coolify-test"
-            "silver-demon60/coolify-test"
+            "synth-coder/coolify-test"
           )
           CURRENT_INDEX=-1
           for i in "${!REPOS[@]}"; do
@@ -289,6 +289,7 @@ jobs:
           echo "Dispatching successor runner to ${PRIMARY_TARGET}..."
           GH_TOKEN="$NEXT_PAT" gh workflow run coolify-test.yml \
             --repo "$PRIMARY_TARGET" \
+            --ref main \
             -f cycle_count="$NEXT_CYCLE" \
             -f retry_depth="0" \
             -f test_handover="${HANDOVER_MINUTE}" || echo "Warning: Dispatch returned non-zero"
