@@ -29,7 +29,8 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq rclone pigz jq
 
           echo "=== 2. Restoring Rclone Google Drive Config ==="
-          mkdir -p ~/.config/rclone /root/.config/rclone
+          mkdir -p ~/.config/rclone
+          sudo mkdir -p /root/.config/rclone
           echo "$RCLONE_CONFIG_BASE64" | base64 -d > ~/.config/rclone/rclone.conf
           sudo cp -f ~/.config/rclone/rclone.conf /root/.config/rclone/rclone.conf
           chmod 600 ~/.config/rclone/rclone.conf
