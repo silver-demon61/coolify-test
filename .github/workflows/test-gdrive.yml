@@ -1,0 +1,65 @@
+name: Test GDrive Relay Engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_cycles:
+        description: 'Test cycle count'
+        required: false
+        default: '1'
+        type: string
+
+jobs:
+  test-gdrive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Test Repository
+        uses: actions/checkout@v4
+
+      - name: Test Google Drive Hydration & Pigz Decompression
+        env:
+          RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}
+          STORAGE_TARGET: ${{ secrets.STORAGE_TARGET }}
+        run: |
+          set -euo pipefail
+          echo "=== 1. Bootstrapping Dependencies ==="
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq rclone pigz jq
+
+          echo "=== 2. Restoring Rclone Google Drive Config ==="
+          mkdir -p ~/.config/rclone /root/.config/rclone
+          echo "$RCLONE_CONFIG_BASE64" | base64 -d > ~/.config/rclone/rclone.conf
+          sudo cp -f ~/.config/rclone/rclone.conf /root/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+
+          TARGET="${STORAGE_TARGET:-gdrive:coolify-relay-state/coolify-state}"
+          echo "Target storage: $TARGET"
+
+          echo "=== 3. Testing Google Drive Connectivity ==="
+          rclone lsf "$TARGET" --fast-list
+
+          echo "=== 4. Testing Download with 128M Chunks ==="
+          mkdir -p /tmp/test_cache /data/coolify
+          time rclone copy "$TARGET" /tmp/test_cache \
+            --include "coolify_bundle.tar.gz" \
+            --drive-chunk-size 128M \
+            --fast-list -v
+
+          ls -lh /tmp/test_cache/
+
+          echo "=== 5. Testing 4-Core Pigz Decompression ==="
+          time pigz -dc -p 4 /tmp/test_cache/coolify_bundle.tar.gz | sudo tar --numeric-owner -xpf - -C /data/coolify
+
+          echo "Extracted files in /data/coolify:"
+          sudo ls -la /data/coolify
+
+          echo "=== 6. Testing Script: sync_delta.sh ==="
+          chmod +x scripts/coolify/sync_delta.sh
+          ./scripts/coolify/sync_delta.sh "$TARGET"
+
+          echo "=== 7. Verifying Upload on Google Drive ==="
+          rclone lsl "$TARGET" --fast-list
+
+          echo "=== ALL GOOGLE DRIVE ENGINE TESTS PASSED! ==="
