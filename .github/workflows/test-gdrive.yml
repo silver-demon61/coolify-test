@@ -42,7 +42,8 @@ jobs:
           rclone lsf "$TARGET" --fast-list
 
           echo "=== 4. Testing Download with 128M Chunks ==="
-          mkdir -p /tmp/test_cache /data/coolify
+          mkdir -p /tmp/test_cache
+          sudo mkdir -p /data/coolify
           time rclone copy "$TARGET" /tmp/test_cache \
             --include "coolify_bundle.tar.gz" \
             --drive-chunk-size 128M \
